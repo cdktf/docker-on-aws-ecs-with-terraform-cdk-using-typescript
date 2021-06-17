@@ -1,0 +1,5 @@
+application/backend/node_modules/
+application/frontend/node_modules/
+.env
+.vscode
+.DS_Store
