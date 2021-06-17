@@ -1,0 +1,18 @@
+.post {
+    background-color: #67AAF9;
+    border-radius: 5px;
+    padding: 2em;
+    margin-top: 2em;
+}   
+
+.post-content {
+    font-size: 24px;
+    color: black;
+}
+
+.post-metadata {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid white;
+    padding-top: 1em;
+}
