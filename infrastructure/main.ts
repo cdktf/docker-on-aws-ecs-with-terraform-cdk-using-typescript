@@ -38,37 +38,39 @@ const tags = {
   owner: "dschmidt",
 };
 
-function PushedECRImage(scope: Construct, name: string, projectPath: string) {
-  const repo = new EcrRepository(scope, `${name}-ecr`, {
-    name,
-    tags,
-  });
+class PushedECRImage extends Resource {
+  tag: string;
+  image: Resource;
+  constructor(scope: Construct, name: string, projectPath: string) {
+    super(scope, name);
+    const repo = new EcrRepository(scope, `${name}-ecr`, {
+      name,
+      tags,
+    });
 
-  const auth = new DataAwsEcrAuthorizationToken(scope, `${name}-auth`, {
-    dependsOn: [repo],
-    registryId: repo.registryId,
-  });
+    const auth = new DataAwsEcrAuthorizationToken(scope, `${name}-auth`, {
+      dependsOn: [repo],
+      registryId: repo.registryId,
+    });
 
-  const asset = new TerraformAsset(scope, `${name}-project`, {
-    path: projectPath,
-  });
+    const asset = new TerraformAsset(scope, `${name}-project`, {
+      path: projectPath,
+    });
 
-  const version = require(`${projectPath}/package.json`).version;
-  const tag = `${repo.repositoryUrl}:${version}-${asset.assetHash}`;
-  // Workaround due to https://github.com/kreuzwerker/terraform-provider-docker/issues/189
-  const image = new Resource(scope, `${name}-image-${tag}`, {});
-  image.addOverride(
-    "provisioner.local-exec.command",
-    `
+    const version = require(`${projectPath}/package.json`).version;
+    this.tag = `${repo.repositoryUrl}:${version}-${asset.assetHash}`;
+    // Workaround due to https://github.com/kreuzwerker/terraform-provider-docker/issues/189
+    this.image = new Resource(scope, `${name}-image-${tag}`, {});
+    this.image.addOverride(
+      "provisioner.local-exec.command",
+      `
 docker login -u ${auth.userName} -p ${auth.password} ${auth.proxyEndpoint} &&
-docker build -t ${tag} ${asset.path} &&
-docker push ${tag}
+docker build -t ${this.tag} ${asset.path} &&
+docker push ${this.tag}
 `
-  );
-
-  return { image, tag };
+    );
+  }
 }
-
 class PostgresDB extends Resource {
   public instance: TerraformAwsModulesRdsAws;
 
@@ -433,76 +435,79 @@ class LoadBalancer extends Resource {
   }
 }
 
-function PublicS3Bucket(
-  scope: Construct,
-  name: string,
-  absoluteContentPath: string
-) {
-  // Get built frontend into the terraform context
-  const { path: contentPath, assetHash: contentHash } = new TerraformAsset(
-    scope,
-    `${name}-frontend`,
-    {
-      path: absoluteContentPath,
-    }
-  );
+class PublicS3Bucket extends Resource {
+  bucket: S3Bucket;
 
-  // create bucket with website delivery enabled
-  const bucket = new S3Bucket(scope, `${name}-bucket`, {
-    bucketPrefix: `${name}-frontend`,
-
-    website: [
+  constructor(scope: Construct, name: string, absoluteContentPath: string) {
+    super(scope, name);
+    // Get built frontend into the terraform context
+    const { path: contentPath, assetHash: contentHash } = new TerraformAsset(
+      scope,
+      `${name}-frontend`,
       {
-        indexDocument: "index.html",
-        errorDocument: "index.html", // we could put a static error page here
-      },
-    ],
-    tags: {
-      ...tags,
-      "hc-internet-facing": "true", // this is only needed for HashiCorp internal security auditing
-    },
-  });
+        path: absoluteContentPath,
+      }
+    );
 
-  // Get all build files synchronously
-  const files = glob("**/*.{json,js,html,png,ico,txt,map,css}", {
-    cwd: absoluteContentPath,
-  });
+    // create bucket with website delivery enabled
+    this.bucket = new S3Bucket(scope, `${name}-bucket`, {
+      bucketPrefix: `${name}-frontend`,
 
-  files.forEach((f) => {
-    // Construct the local path to the file
-    const filePath = path.join(contentPath, f);
-
-    // Creates all the files in the bucket
-    new S3BucketObject(scope, `${bucket.id}/${f}/${contentHash}`, {
-      bucket: bucket.id,
-      tags,
-      key: f,
-      source: filePath,
-      // mime is an open source node.js tool to get mime types per extension
-      contentType: mime(path.extname(f)) || "text/html",
-      etag: `filemd5("${filePath}")`,
-    });
-  });
-
-  // allow read access to all elements within the S3Bucket
-  new S3BucketPolicy(scope, `${name}-s3-policy`, {
-    bucket: bucket.id,
-    policy: JSON.stringify({
-      Version: "2012-10-17",
-      Id: `${name}-public-website`,
-      Statement: [
+      website: [
         {
-          Sid: "PublicRead",
-          Effect: "Allow",
-          Principal: "*",
-          Action: ["s3:GetObject"],
-          Resource: [`${bucket.arn}/*`, `${bucket.arn}`],
+          indexDocument: "index.html",
+          errorDocument: "index.html", // we could put a static error page here
         },
       ],
-    }),
-  });
+      tags: {
+        ...tags,
+        "hc-internet-facing": "true", // this is only needed for HashiCorp internal security auditing
+      },
+    });
 
-  return bucket;
+    // Get all build files synchronously
+    const files = glob("**/*.{json,js,html,png,ico,txt,map,css}", {
+      cwd: absoluteContentPath,
+    });
+
+    files.forEach((f) => {
+      // Construct the local path to the file
+      const filePath = path.join(contentPath, f);
+
+      // Creates all the files in the bucket
+      new S3BucketObject(scope, `${this.bucket.id}/${f}/${contentHash}`, {
+        bucket: this.bucket.id,
+        tags,
+        key: f,
+        source: filePath,
+        // mime is an open source node.js tool to get mime types per extension
+        contentType: mime(path.extname(f)) || "text/html",
+        etag: `filemd5("${filePath}")`,
+      });
+    });
+
+    // allow read access to all elements within the S3Bucket
+    new S3BucketPolicy(scope, `${name}-s3-policy`, {
+      bucket: this.bucket.id,
+      policy: JSON.stringify({
+        Version: "2012-10-17",
+        Id: `${name}-public-website`,
+        Statement: [
+          {
+            Sid: "PublicRead",
+            Effect: "Allow",
+            Principal: "*",
+            Action: ["s3:GetObject"],
+            Resource: [`${this.bucket.arn}/*`, `${this.bucket.arn}`],
+          },
+        ],
+      }),
+    });
+  }
+
+  get websiteEndpoint() {
+    return this.bucket.websiteEndpoint;
+  }
 }
 
 // TODO: tag everything
@@ -598,7 +603,7 @@ class MyStack extends TerraformStack {
       "/backend"
     );
 
-    const bucket = PublicS3Bucket(
+    const bucket = new PublicS3Bucket(
       this,
       name,
       path.resolve(__dirname, "../application/frontend/build")
