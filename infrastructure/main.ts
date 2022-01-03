@@ -1,5 +1,11 @@
 import { Construct } from "constructs";
-import { App, TerraformAsset, TerraformOutput, TerraformStack } from "cdktf";
+import {
+  App,
+  Fn,
+  TerraformAsset,
+  TerraformOutput,
+  TerraformStack,
+} from "cdktf";
 import * as path from "path";
 import { sync as glob } from "glob";
 import { lookup as mime } from "mime-types";
@@ -398,7 +404,7 @@ class LoadBalancer extends Resource {
     });
 
     // Ensure the task is running and wired to the target group, within the right security group
-    const service = new EcsService(this, `service`, {
+    new EcsService(this, `service`, {
       dependsOn: [this.lbl],
       tags,
       name,
@@ -407,7 +413,7 @@ class LoadBalancer extends Resource {
       desiredCount: 1,
       taskDefinition: task.arn,
       networkConfiguration: {
-        subnets: [],
+        subnets: Fn.tolist(this.vpc.publicSubnetsOutput),
         assignPublicIp: true,
         securityGroups: [serviceSecurityGroup.id],
       },
@@ -419,13 +425,6 @@ class LoadBalancer extends Resource {
         },
       ],
     });
-
-    // This is necessary due to a shortcoming in our token system to be adressed in
-    // https://github.com/hashicorp/terraform-cdk/issues/651
-    service.addOverride(
-      "network_configuration.0.subnets",
-      this.vpc.publicSubnetsOutput
-    );
   }
 }
 
