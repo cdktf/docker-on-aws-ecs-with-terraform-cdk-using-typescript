@@ -101,7 +101,7 @@ class PostgresDB extends Resource {
     const dbPort = 5432;
 
     const dbSecurityGroup = new SecurityGroup(this, "db-security-group", {
-      vpcId: vpc.vpcIdOutput,
+      vpcId: Fn.tostring(vpc.vpcIdOutput),
       ingress: [
         // allow traffic to the DBs port from the service
         {
@@ -308,7 +308,7 @@ class LoadBalancer extends Resource {
     this.cluster = cluster;
 
     const lbSecurityGroup = new SecurityGroup(this, `lb-security-group`, {
-      vpcId: vpc.vpcIdOutput,
+      vpcId: Fn.tostring(vpc.vpcIdOutput),
       tags,
       ingress: [
         // allow HTTP traffic from everywhere
@@ -377,7 +377,7 @@ class LoadBalancer extends Resource {
       port: 80,
       protocol: "HTTP",
       targetType: "ip",
-      vpcId: this.vpc.vpcIdOutput,
+      vpcId: Fn.tostring(this.vpc.vpcIdOutput),
       healthCheck: {
         enabled: true,
         path: "/ready",
@@ -541,7 +541,7 @@ class MyStack extends TerraformStack {
       this,
       `service-security-group`,
       {
-        vpcId: vpc.vpcIdOutput,
+        vpcId: Fn.tostring(vpc.vpcIdOutput),
         tags,
         ingress: [
           // only allow incoming traffic from our load balancer
@@ -574,7 +574,7 @@ class MyStack extends TerraformStack {
 
     const { image: backendImage, tag: backendTag } = new PushedECRImage(
       this,
-      "backend",
+      "backend-image",
       path.resolve(__dirname, "../application/backend")
     );
 
@@ -583,8 +583,8 @@ class MyStack extends TerraformStack {
       POSTGRES_USER: db.instance.username,
       POSTGRES_PASSWORD: db.instance.password,
       POSTGRES_DB: db.instance.name,
-      POSTGRES_HOST: db.instance.dbInstanceAddressOutput,
-      POSTGRES_PORT: db.instance.dbInstancePortOutput,
+      POSTGRES_HOST: Fn.tostring(db.instance.dbInstanceAddressOutput),
+      POSTGRES_PORT: Fn.tostring(db.instance.dbInstancePortOutput),
     });
     loadBalancer.exposeService(
       "backend",
