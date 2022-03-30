@@ -17,6 +17,7 @@ import {
 } from "@cdktf/provider-aws/lib/ecr";
 import {
   EcsCluster,
+  EcsClusterCapacityProviders,
   EcsService,
   EcsTaskDefinition,
 } from "@cdktf/provider-aws/lib/ecs";
@@ -31,8 +32,9 @@ import { CloudwatchLogGroup } from "@cdktf/provider-aws/lib/cloudwatch";
 import { SecurityGroup } from "@cdktf/provider-aws/lib/vpc";
 import {
   S3Bucket,
-  S3BucketObject,
+  S3Object,
   S3BucketPolicy,
+  S3BucketWebsiteConfiguration,
 } from "@cdktf/provider-aws/lib/s3";
 import { NullProvider, Resource } from "@cdktf/provider-null";
 import { Vpc } from "./.gen/modules/terraform-aws-modules/aws/vpc";
@@ -119,8 +121,9 @@ class PostgresDB extends Resource {
       identifier: `${name}-db`,
 
       engine: "postgres",
-      engineVersion: "11.10",
-      family: "postgres11",
+      engineVersion: "14.1",
+      family: "postgres14",
+      majorEngineVersion: "14",
       instanceClass: "db.t3.micro",
       allocatedStorage: "5",
 
@@ -154,8 +157,12 @@ class Cluster extends Resource {
 
     const cluster = new EcsCluster(this, `ecs-${clusterName}`, {
       name: clusterName,
-      capacityProviders: ["FARGATE"],
       tags,
+    });
+
+    new EcsClusterCapacityProviders(this, `capacity-providers-${clusterName}`, {
+      clusterName: cluster.name,
+      capacityProviders: ["FARGATE"],
     });
 
     this.cluster = cluster;
@@ -442,17 +449,26 @@ class PublicS3Bucket extends Resource {
       }
     );
 
-    // create bucket with website delivery enabled
+    // Create bucket
     this.bucket = new S3Bucket(this, `bucket`, {
       bucketPrefix: `${name}`,
 
-      website: {
-        indexDocument: "index.html",
-        errorDocument: "index.html", // we could put a static error page here
-      },
       tags: {
         ...tags,
         "hc-internet-facing": "true", // this is only needed for HashiCorp internal security auditing
+      },
+    });
+
+    // Enable website delivery
+    new S3BucketWebsiteConfiguration(this, `website-configuration`, {
+      bucket: this.bucket.bucket,
+
+      indexDocument: {
+        suffix: "index.html",
+      },
+
+      errorDocument: {
+        key: "index.html", // we could put a static error page here
       },
     });
 
@@ -466,7 +482,7 @@ class PublicS3Bucket extends Resource {
       const filePath = path.join(contentPath, f);
 
       // Creates all the files in the bucket
-      new S3BucketObject(this, `${name}/${f}/${contentHash}`, {
+      new S3Object(this, `${name}/${f}/${contentHash}`, {
         bucket: this.bucket.id,
         tags,
         key: f,
