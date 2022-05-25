@@ -22,9 +22,9 @@
     "node": ">=10.12"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "^7.0.0",
-    "@cdktf/provider-null": "^0.6.0",
-    "cdktf": "^0.10.0",
+    "@cdktf/provider-aws": "^8.0.0",
+    "@cdktf/provider-null": "^1.0.0",
+    "cdktf": "^0.11.0",
     "constructs": "^10.0.23",
     "glob": "^7.2.0",
     "mime-types": "^2.1.34"
@@ -33,7 +33,7 @@
     "@types/glob": "^7.2.0",
     "@types/mime-types": "^2.1.1",
     "@types/node": "^15.6.2",
-    "cdktf-cli": "^0.10.0",
+    "cdktf-cli": "^0.11.0",
     "typescript": "^4.3.2"
   }
 }
