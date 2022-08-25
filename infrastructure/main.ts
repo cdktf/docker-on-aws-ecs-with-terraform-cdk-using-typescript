@@ -50,7 +50,7 @@ const tags = {
   owner: "dschmidt",
 };
 
-class PushedECRImage extends Resource {
+class PushedECRImage extends Construct {
   tag: string;
   image: Resource;
   constructor(scope: Construct, name: string, projectPath: string) {
@@ -83,7 +83,7 @@ docker push ${this.tag}
     );
   }
 }
-class PostgresDB extends Resource {
+class PostgresDB extends Construct {
   public instance: Rds;
 
   constructor(
@@ -150,7 +150,7 @@ class PostgresDB extends Resource {
   }
 }
 
-class Cluster extends Resource {
+class Cluster extends Construct {
   public cluster: EcsCluster;
   constructor(scope: Construct, clusterName: string) {
     super(scope, clusterName);
@@ -303,7 +303,7 @@ class Cluster extends Resource {
   }
 }
 
-class LoadBalancer extends Resource {
+class LoadBalancer extends Construct {
   lb: Lb;
   lbl: LbListener;
   vpc: Vpc;
@@ -435,7 +435,7 @@ class LoadBalancer extends Resource {
   }
 }
 
-class PublicS3Bucket extends Resource {
+class PublicS3Bucket extends Construct {
   bucket: S3Bucket;
 
   constructor(scope: Construct, name: string, absoluteContentPath: string) {
