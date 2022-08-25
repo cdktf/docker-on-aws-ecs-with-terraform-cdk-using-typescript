@@ -85,7 +85,7 @@ The service also needs a security group to run in and that security group needs 
 We start by creating a Load Balancer:
 
 ```ts
-class LoadBalancer extends Resource {
+class LoadBalancer extends Construct {
   lb: Lb;
   lbl: LbListener;
   vpc: VPC;
@@ -226,7 +226,7 @@ class MyStack extends TerraformStack {
 Now we can use this security group to allow the postgres instance to receive traffic from our service:
 
 ```ts
-class PostgresDB extends Resource {
+class PostgresDB extends Construct {
   public instance: TerraformAwsModulesRdsAws;
 
   constructor(
@@ -362,7 +362,7 @@ I require the package.json of the project so that our image tag is prefixed with
 Now that Database, ECS Cluster, and Image are in place we can run our docker image in ECR:
 
 ```ts
-class Cluster extends Resource {
+class Cluster extends Construct {
   public cluster: EcsCluster;
   // ...
   public runDockerImage(
@@ -524,7 +524,7 @@ The ECS Task uses all these resources and assumes some other settings (CPU and M
 Now that we have a running task we need to expose it on our load balancer:
 
 ```ts
-class LoadBalancer extends Resource {
+class LoadBalancer extends Construct {
   lb: Lb;
   lbl: LbListener;
   vpc: VPC;
