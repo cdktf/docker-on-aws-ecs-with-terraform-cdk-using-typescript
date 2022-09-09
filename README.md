@@ -131,11 +131,8 @@ class LoadBalancer extends Construct {
       internal: false,
       loadBalancerType: "application",
       securityGroups: [lbSecurityGroup.id],
+      subnets: Fn.tolist(vpc.publicSubnetsOutput),
     });
-
-    // This is necessary due to a shortcoming in our token system to be adressed in
-    // https://github.com/hashicorp/terraform-cdk/issues/651
-    this.lb.addOverride("subnets", vpc.publicSubnetsOutput);
 
     this.lbl = new LbListener(scope, `${name}-lb-listener`, {
       loadBalancerArn: this.lb.arn,
@@ -313,32 +310,34 @@ To deploy the ECS Task we first need to have a docker image pushed. It's up to y
 
 ```ts
 function PushedECRImage(scope: Construct, name: string, projectPath: string) {
-  const repo = new EcrRepository(scope, `${name}-ecr`, {
+  const repo = new EcrRepository(this, `${name}-ecr`, {
     name,
     tags,
   });
 
-  const auth = new DataAwsEcrAuthorizationToken(scope, `${name}-auth`, {
+  const auth = new DataAwsEcrAuthorizationToken(this, `${name}-auth`, {
     dependsOn: [repo],
     registryId: repo.registryId,
   });
 
-  const asset = new TerraformAsset(scope, `${name}-project`, {
+  const asset = new TerraformAsset(this, `${name}-project`, {
     path: projectPath,
   });
 
   const version = require(`${projectPath}/package.json`).version;
   const tag = `${repo.repositoryUrl}:${version}-${asset.assetHash}`;
   // Workaround due to https://github.com/kreuzwerker/terraform-provider-docker/issues/189
-  const image = new Resource(scope, `${name}-image-${tag}`, {});
-  image.addOverride(
-    "provisioner.local-exec.command",
-    `
-docker login -u ${auth.userName} -p ${auth.password} ${auth.proxyEndpoint} &&
-docker build -t ${tag} ${asset.path} &&
-docker push ${tag}
-`
-  );
+  const image = new Resource(this, `image`, {
+    provisioners: [
+      {
+        type: "local-exec",
+        workingDir: asset.path,
+        command: `docker login -u ${auth.userName} -p ${auth.password} ${auth.proxyEndpoint} && 
+  docker build -t ${this.tag} . && 
+  docker push ${this.tag}`,
+      },
+    ],
+  });
 
   return { image, tag };
 }
@@ -584,7 +583,7 @@ class LoadBalancer extends Construct {
       taskDefinition: task.arn,
       networkConfiguration: [
         {
-          subnets: [],
+          subnets: Fn.tolist(this.vpc.publicSubnetsOutput),
           assignPublicIp: true,
           securityGroups: [serviceSecurityGroup.id],
         },
@@ -597,13 +596,6 @@ class LoadBalancer extends Construct {
         },
       ],
     });
-
-    // This is necessary due to a shortcoming in our token system to be adressed in
-    // https://github.com/hashicorp/terraform-cdk/issues/651
-    service.addOverride(
-      "network_configuration.0.subnets",
-      this.vpc.publicSubnetsOutput
-    );
   }
 }
 

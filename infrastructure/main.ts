@@ -72,15 +72,17 @@ class PushedECRImage extends Construct {
     const version = require(`${projectPath}/package.json`).version;
     this.tag = `${repo.repositoryUrl}:${version}-${asset.assetHash}`;
     // Workaround due to https://github.com/kreuzwerker/terraform-provider-docker/issues/189
-    this.image = new Resource(this, `image`, {});
-    this.image.addOverride(
-      "provisioner.local-exec.command",
-      `
-docker login -u ${auth.userName} -p ${auth.password} ${auth.proxyEndpoint} &&
-docker build -t ${this.tag} ${asset.path} &&
-docker push ${this.tag}
-`
-    );
+    this.image = new Resource(this, `image`, {
+      provisioners: [
+        {
+          type: "local-exec",
+          workingDir: asset.path,
+          command: `docker login -u ${auth.userName} -p ${auth.password} ${auth.proxyEndpoint} && 
+  docker build -t ${this.tag} . && 
+  docker push ${this.tag}`,
+        },
+      ],
+    });
   }
 }
 class PostgresDB extends Construct {
@@ -345,11 +347,8 @@ class LoadBalancer extends Construct {
       internal: false,
       loadBalancerType: "application",
       securityGroups: [lbSecurityGroup.id],
+      subnets: Fn.tolist(vpc.publicSubnetsOutput),
     });
-
-    // This is necessary due to a shortcoming in our token system to be adressed in
-    // https://github.com/hashicorp/terraform-cdk/issues/651
-    this.lb.addOverride("subnets", vpc.publicSubnetsOutput);
 
     this.lbl = new LbListener(this, `lb-listener`, {
       loadBalancerArn: this.lb.arn,
