@@ -9,7 +9,7 @@ import {
 import * as path from "path";
 import { sync as glob } from "glob";
 import { lookup as mime } from "mime-types";
-import { AwsProvider } from "./.gen/providers/aws";
+import { AwsProvider } from "./.gen/providers/aws/aws-provider";
 import { CloudfrontDistribution } from "./.gen/providers/aws/cloudfront";
 import {
   DataAwsEcrAuthorizationToken,
@@ -36,10 +36,12 @@ import {
   S3BucketPolicy,
   S3BucketWebsiteConfiguration,
 } from "./.gen/providers/aws/s3";
-import { NullProvider, Resource } from "./.gen/providers/null";
+import { NullProvider } from "./.gen/providers/null/null-provider";
+import { Resource } from "./.gen/providers/null/resource";
 import { Vpc } from "./.gen/modules/terraform-aws-modules/aws/vpc";
 import { Rds } from "./.gen/modules/terraform-aws-modules/aws/rds";
-import { RandomProvider, Password } from "./.gen/providers/random";
+import { RandomProvider } from "./.gen/providers/random/random-provider";
+import { Password } from "./.gen/providers/random/password";
 
 const S3_ORIGIN_ID = "s3Origin";
 const BACKEND_ORIGIN_ID = "backendOrigin";
