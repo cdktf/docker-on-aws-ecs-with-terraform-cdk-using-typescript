@@ -9,34 +9,34 @@ import {
 import * as path from "path";
 import { sync as glob } from "glob";
 import { lookup as mime } from "mime-types";
-import { AwsProvider } from "@cdktf/provider-aws";
-import { CloudfrontDistribution } from "@cdktf/provider-aws/lib/cloudfront";
+import { AwsProvider } from "./.gen/providers/aws";
+import { CloudfrontDistribution } from "./.gen/providers/aws/cloudfront";
 import {
   DataAwsEcrAuthorizationToken,
   EcrRepository,
-} from "@cdktf/provider-aws/lib/ecr";
+} from "./.gen/providers/aws/ecr";
 import {
   EcsCluster,
   EcsClusterCapacityProviders,
   EcsService,
   EcsTaskDefinition,
-} from "@cdktf/provider-aws/lib/ecs";
-import { IamRole } from "@cdktf/provider-aws/lib/iam";
+} from "./.gen/providers/aws/ecs";
+import { IamRole } from "./.gen/providers/aws/iam";
 import {
   Lb,
   LbListener,
   LbListenerRule,
   LbTargetGroup,
-} from "@cdktf/provider-aws/lib/elb";
-import { CloudwatchLogGroup } from "@cdktf/provider-aws/lib/cloudwatch";
-import { SecurityGroup } from "@cdktf/provider-aws/lib/vpc";
+} from "./.gen/providers/aws/elb";
+import { CloudwatchLogGroup } from "./.gen/providers/aws/cloudwatch";
+import { SecurityGroup } from "./.gen/providers/aws/vpc";
 import {
   S3Bucket,
   S3Object,
   S3BucketPolicy,
   S3BucketWebsiteConfiguration,
-} from "@cdktf/provider-aws/lib/s3";
-import { NullProvider, Resource } from "@cdktf/provider-null";
+} from "./.gen/providers/aws/s3";
+import { NullProvider, Resource } from "./.gen/providers/null";
 import { Vpc } from "./.gen/modules/terraform-aws-modules/aws/vpc";
 import { Rds } from "./.gen/modules/terraform-aws-modules/aws/rds";
 import { RandomProvider, Password } from "./.gen/providers/random";
