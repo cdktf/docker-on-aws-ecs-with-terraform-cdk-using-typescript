@@ -9,37 +9,31 @@ import {
 import * as path from "path";
 import { sync as glob } from "glob";
 import { lookup as mime } from "mime-types";
-import { AwsProvider } from "@cdktf/provider-aws";
-import { CloudfrontDistribution } from "@cdktf/provider-aws/lib/cloudfront";
-import {
-  DataAwsEcrAuthorizationToken,
-  EcrRepository,
-} from "@cdktf/provider-aws/lib/ecr";
-import {
-  EcsCluster,
-  EcsClusterCapacityProviders,
-  EcsService,
-  EcsTaskDefinition,
-} from "@cdktf/provider-aws/lib/ecs";
-import { IamRole } from "@cdktf/provider-aws/lib/iam";
-import {
-  Lb,
-  LbListener,
-  LbListenerRule,
-  LbTargetGroup,
-} from "@cdktf/provider-aws/lib/elb";
-import { CloudwatchLogGroup } from "@cdktf/provider-aws/lib/cloudwatch";
-import { SecurityGroup } from "@cdktf/provider-aws/lib/vpc";
-import {
-  S3Bucket,
-  S3Object,
-  S3BucketPolicy,
-  S3BucketWebsiteConfiguration,
-} from "@cdktf/provider-aws/lib/s3";
-import { NullProvider, Resource } from "@cdktf/provider-null";
+import { AwsProvider } from "@cdktf/provider-aws/lib/provider";
+import { CloudfrontDistribution } from "@cdktf/provider-aws/lib/cloudfront-distribution";
+import { DataAwsEcrAuthorizationToken } from "@cdktf/provider-aws/lib/data-aws-ecr-authorization-token";
+import { EcrRepository } from "@cdktf/provider-aws/lib/ecr-repository";
+import { EcsCluster } from "@cdktf/provider-aws/lib/ecs-cluster";
+import { EcsClusterCapacityProviders } from "@cdktf/provider-aws/lib/ecs-cluster-capacity-providers";
+import { EcsService } from "@cdktf/provider-aws/lib/ecs-service";
+import { EcsTaskDefinition } from "@cdktf/provider-aws/lib/ecs-task-definition";
+import { IamRole } from "@cdktf/provider-aws/lib/iam-role";
+import { Lb } from "@cdktf/provider-aws/lib/lb";
+import { LbListener } from "@cdktf/provider-aws/lib/lb-listener";
+import { LbTargetGroup } from "@cdktf/provider-aws/lib/lb-target-group";
+import { LbListenerRule } from "@cdktf/provider-aws/lib/lb-listener-rule";
+import { CloudwatchLogGroup } from "@cdktf/provider-aws/lib/cloudwatch-log-group";
+import { SecurityGroup } from "@cdktf/provider-aws/lib/security-group";
+import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket";
+import { S3Object } from "@cdktf/provider-aws/lib/s3-object";
+import { S3BucketPolicy } from "@cdktf/provider-aws/lib/s3-bucket-policy";
+import { S3BucketWebsiteConfiguration } from "@cdktf/provider-aws/lib/s3-bucket-website-configuration";
+import { NullProvider } from "@cdktf/provider-null/lib/provider";
+import { Resource } from "@cdktf/provider-null/lib/resource";
 import { Vpc } from "./.gen/modules/terraform-aws-modules/aws/vpc";
 import { Rds } from "./.gen/modules/terraform-aws-modules/aws/rds";
-import { RandomProvider, Password } from "./.gen/providers/random";
+import { RandomProvider } from "./.gen/providers/random/provider";
+import { Password } from "./.gen/providers/random/password";
 
 const S3_ORIGIN_ID = "s3Origin";
 const BACKEND_ORIGIN_ID = "backendOrigin";
