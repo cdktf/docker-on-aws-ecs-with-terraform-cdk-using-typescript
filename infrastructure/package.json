@@ -22,9 +22,9 @@
     "node": ">=10.12"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "^11.0.0",
-    "@cdktf/provider-null": "^4.0.0",
-    "cdktf": "^0.14.0",
+    "@cdktf/provider-aws": "^12.0.0",
+    "@cdktf/provider-null": "^5.0.0",
+    "cdktf": "^0.15.0",
     "constructs": "^10.0.23",
     "glob": "^7.2.0",
     "mime-types": "^2.1.34"
