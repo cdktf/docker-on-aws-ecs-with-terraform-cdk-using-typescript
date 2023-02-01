@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import React from "react";
 
 const API_URL = process.env.REACT_APP_API_ENDPOINT || "http://localhost:4000";

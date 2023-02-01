@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) HashiCorp, Inc.
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 import migrate from "node-pg-migrate";
 import { MigrationDirection } from "node-pg-migrate/dist/types";
 import { resolve } from "path";
