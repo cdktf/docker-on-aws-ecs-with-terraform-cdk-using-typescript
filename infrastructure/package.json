@@ -9,6 +9,7 @@
     "postinstall": "npm run get",
     "get": "npx cdktf get",
     "build": "tsc",
+    "presynth": "cd ../application/frontend && npm install && npm run build",
     "synth": "npx cdktf synth",
     "compile": "tsc --pretty",
     "predeploy": "cd ../application/frontend && npm install && npm run build",
