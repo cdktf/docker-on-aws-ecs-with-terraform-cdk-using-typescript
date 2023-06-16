@@ -6,10 +6,9 @@
   "license": "MPL-2.0",
   "private": true,
   "scripts": {
-    "postinstall": "npm run get",
     "get": "npx cdktf get",
     "build": "tsc",
-    "presynth": "cd ../application/frontend && npm install && npm run build",
+    "presynth": "npm run get && cd ../application/frontend && npm install && npm run build",
     "synth": "npx cdktf synth",
     "compile": "tsc --pretty",
     "predeploy": "cd ../application/frontend && npm install && npm run build",
@@ -23,9 +22,9 @@
     "node": ">=10.12"
   },
   "dependencies": {
-    "@cdktf/provider-aws": "^12.0.0",
-    "@cdktf/provider-null": "^5.0.0",
-    "cdktf": "^0.15.0",
+    "@cdktf/provider-aws": "^15.0.0",
+    "@cdktf/provider-null": "^7.0.0",
+    "cdktf": "0.17.0",
     "constructs": "^10.0.23",
     "glob": "^7.2.0",
     "mime-types": "^2.1.34"
@@ -34,7 +33,7 @@
     "@types/glob": "^7.2.0",
     "@types/mime-types": "^2.1.1",
     "@types/node": "^15.6.2",
-    "cdktf-cli": "^0.14.0",
+    "cdktf-cli": "0.17.0",
     "typescript": "^4.3.2"
   }
 }
