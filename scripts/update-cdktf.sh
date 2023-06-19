@@ -19,5 +19,6 @@ git add --all
 git commit -m "chore: update cdktf to $CDKTF_VERSION"
 git push origin cdktf-update-$CDKTF_VERSION
 
+gh label create -f "cdktf-update-$CDKTF_VERSION"
 gh pr create -f --base main --head cdktf-update-$CDKTF_VERSION --title "chore: update cdktf to $CDKTF_VERSION" --label "cdktf-update-$CDKTF_VERSION"
 
