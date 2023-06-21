@@ -1,0 +1,27 @@
+name: Synth
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - labeled
+      - unlabeled
+      - reopened
+  workflow_dispatch: {}
+
+jobs:
+  synth:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.mirror.hashicorp.services/hashicorp/jsii-terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Install dependencies
+        run: cd infrastructure && yarn
+      - name: Synth
+        run: cd infrastructure && yarn get && yarn synth
